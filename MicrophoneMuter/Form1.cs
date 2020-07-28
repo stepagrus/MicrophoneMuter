@@ -18,61 +18,54 @@ namespace MicrophoneMuter
     public Form1()
     {
       InitializeComponent();
+
+      _muter = new MicrophoneMuter();
+      _muter.ErrorChanged += OnErrorChanged;
+      _muter.MutedChanged += OMuteChanged;
     }
 
     protected override void OnLoad(EventArgs e)
     {
       base.OnLoad(e);
-
-      this.ShowInTaskbar = false;
       this.Hide();
-      notifyIcon1.Visible = true;
+      _muter.Start();
 
-      InitalizeMicrophoneState();
       notifyIcon1.MouseDown += NotifyIcon1_MouseDown;
     }
+
+    private void OMuteChanged(object sender, bool? e)
+    {
+      if (e.HasValue)
+      {
+        notifyIcon1.Icon = e.Value ? _redIco : _greenIco;
+      }
+      else
+      {
+        notifyIcon1.Icon = _errorIco;
+      }
+    }
+
+    private void OnErrorChanged(object sender, string errorMessage)
+    {
+      notifyIcon1.ShowBalloonTip(1000, "Ошибка", errorMessage, ToolTipIcon.Error);
+    }
+
 
     private void NotifyIcon1_MouseDown(object sender, MouseEventArgs e)
     {
       if (e.Button != MouseButtons.Left)
         return;
 
-      ChangeState();
+      _muter.ChangeToOpposite();
       выходToolStripMenuItem.Text = GetRandomText();
     }
 
-    private void InitalizeMicrophoneState()
-    {
-      var muter = GetMuteControl();
-      _isMuted = muter.Value;
-      notifyIcon1.Icon = _isMuted ? _redIco : _greenIco;
-    }
-
-    private void ChangeState()
-    {
-      var muter = GetMuteControl();
-      muter.Value = !muter.Value;
-      _isMuted = muter.Value;
-      notifyIcon1.Icon = _isMuted ? _redIco : _greenIco;
-    }
 
     private static string GetPathToIco(string icoName)
     {
       return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, icoName);
     }
 
-    private BooleanMixerControl GetMuteControl()
-    {
-      var waveInEvent = new NAudio.Wave.WaveInEvent();
-
-      //get mixer of default audio device
-      var mixer = waveInEvent.GetMixerLine();
-      var muter = mixer.Controls.FirstOrDefault(x => x.ControlType == NAudio.Mixer.MixerControlType.Mute) as BooleanMixerControl;
-      if (muter == null)
-        throw new Exception("Микрофон не поддерживает фунцию Mute");
-
-      return muter;
-    }
 
     private void выходToolStripMenuItem_Click(object sender, EventArgs e)
     {
@@ -86,18 +79,23 @@ namespace MicrophoneMuter
       {
         case 0: return "Выход";
         case 1: return "Закрыть";
-        case 2: return "Ивешвара - молодец";
+        case 2: return "Ивешвара - молодец!";
         case 3: return "Ты сегодня внимательно медитировал?";
         case 4: return "Крепче повторяй Харе Кришна!";
         default: return "Досвидания";
       }
     }
 
+    private readonly MicrophoneMuter _muter;
+
     private const string RedIcoName = "red32.ico";
     private const string GreenIcoName = "green32.ico";
+    private const string ErrorIcoName = "error.ico";
 
-    private bool _isMuted = false;
     private readonly Icon _redIco = Icon.ExtractAssociatedIcon(GetPathToIco(RedIcoName));
     private readonly Icon _greenIco = Icon.ExtractAssociatedIcon(GetPathToIco(GreenIcoName));
+    private readonly Icon _errorIco = Icon.ExtractAssociatedIcon(GetPathToIco(ErrorIcoName));
+
+
   }
 }

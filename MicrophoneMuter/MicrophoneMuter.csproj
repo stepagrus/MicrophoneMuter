@@ -56,6 +56,7 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="MicrophoneMuter.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Form1.resx">
@@ -89,6 +90,9 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="error.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="green32.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
