@@ -103,13 +103,22 @@ namespace MicrophoneMuter
     {
       var waveInEvent = new NAudio.Wave.WaveInEvent();
 
-      //get mixer of default audio device
-      var mixer = waveInEvent.GetMixerLine();
-      var muter = mixer.Controls.FirstOrDefault(x => x.ControlType == NAudio.Mixer.MixerControlType.Mute) as BooleanMixerControl;
-      if (muter == null)
-        throw new Exception(BadMicrophoneMessage);
+      try
+      {
+        //get mixer of default audio device
+        var mixer = waveInEvent.GetMixerLine();
+        var muter = mixer.Controls.FirstOrDefault(x => x.ControlType == NAudio.Mixer.MixerControlType.Mute) as BooleanMixerControl;
+        if (muter == null)
+        {
+          throw new Exception(BadMicrophoneMessage);
+        }
 
-      return muter;
+        return muter;
+      }
+      finally
+      {
+        waveInEvent.Dispose();
+      }
     }
 
     private readonly Timer _timer = new System.Windows.Forms.Timer();
